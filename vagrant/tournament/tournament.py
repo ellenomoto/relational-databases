@@ -13,15 +13,31 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("DELETE from Match;")
+    conn.commit() 
+    conn.close()
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
+    conn = connect()
+    c = conn.cursor()
+    c.execute("DELETE from Player;")
+    conn.commit() 
+    conn.close()
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
-
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) from Player;")
+    playerCount = c.fetchone()[0]
+    conn.commit() 
+    conn.close()
+    return playerCount
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
@@ -32,6 +48,12 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    x = name
+    conn = connect()
+    c = conn.cursor()
+    c.execute("INSERT INTO Player (name, wins, losses, ties) VALUES (%s, %s, %s, %s);", (name, 0, 0, 0))
+    conn.commit() 
+    conn.close()
 
 
 def playerStandings():
@@ -47,6 +69,15 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    playerStandings = []
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT * from Player;")
+    for player in c:
+        playerStandings.append((player[0], player[1], player[2], player[2]+player[3]+player[4]))
+    conn.commit() 
+    conn.close()
+    return sorted(playerStandings, key=lambda x: x[2])
 
 
 def reportMatch(winner, loser):
@@ -56,6 +87,13 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    conn = connect()
+    c = conn.cursor()
+    c.execute("INSERT INTO Match (winner, loser) VALUES (%s, %s);", (winner, loser))
+    c.execute("UPDATE Player SET wins = wins+1 WHERE id=%s;", (winner,))
+    c.execute("UPDATE Player SET losses = losses+1 WHERE id=%s;", (loser,))
+    conn.commit() 
+    conn.close()
  
  
 def swissPairings():
@@ -73,5 +111,12 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    playerRankings = playerStandings()
+    swissPairs = []
+    for index in range(len(playerRankings)/2):
+        player1 = playerRankings[index*2]
+        player2 = playerRankings[(index*2)+1]
+        swissPairs.append((player1[0], player1[1], player2[0], player2[1]))
+    return swissPairs
 
 
