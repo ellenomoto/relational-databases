@@ -6,8 +6,12 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
---CREATE DATABASE tournament;
+DROP DATABASE IF EXISTS tournament;
+CREATE DATABASE tournament;
 
+\c tournament;
+
+DROP TABLE IF EXISTS Player;
 CREATE TABLE Player (
 id SERIAL PRIMARY KEY,
 name VARCHAR(30),
@@ -16,6 +20,7 @@ losses INTEGER,
 ties INTEGER
 );
 
+DROP TABLE IF EXISTS Match;
 CREATE TABLE Match (
 id SERIAL PRIMARY KEY,
 winner INTEGER,
