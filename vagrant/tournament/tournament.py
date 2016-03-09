@@ -4,39 +4,51 @@
 #
 
 import psycopg2
+from contextlib import contextmanager
+"""added context manager per recommendation of past Udacity reviewer"""
 
+@contextmanager
+def cursor():
+    """Helper function to connect and closer cursors using context manager for queries.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        yield cur
+    except:
+        print ("Failed to yield cursor.")
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+    try:
+        return psycopg2.connect("dbname=tournament")
+    except:
+        """added try block per recommendation of past Udacity reviewer
+        it is noted that in a more complex program specific exceptions 
+        should be caught"""
+        print ("Failed to connect to database: tournament.")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE from Match;")
-    conn.commit() 
-    conn.close()
+    with cursor() as c:
+        c.execute("DELETE from Match;")
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE from Player;")
-    conn.commit() 
-    conn.close()
+    with cursor() as c:
+        c.execute("DELETE from Player;")
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) from Player;")
-    playerCount = c.fetchone()[0]
-    conn.commit() 
-    conn.close()
+    with cursor() as c:
+        c.execute("SELECT COUNT(*) from Player;")
+        playerCount = c.fetchone()[0]
     return playerCount
 
 def registerPlayer(name):
@@ -49,11 +61,8 @@ def registerPlayer(name):
       name: the player's full name (need not be unique).
     """
     x = name
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT INTO Player (name, wins, losses, ties) VALUES (%s, %s, %s, %s);", (name, 0, 0, 0))
-    conn.commit() 
-    conn.close()
+    with cursor() as c:
+        c.execute("INSERT INTO Player (name, wins, losses, ties) VALUES (%s, %s, %s, %s);", (name, 0, 0, 0))
 
 
 def playerStandings():
@@ -70,13 +79,10 @@ def playerStandings():
         matches: the number of matches the player has played
     """
     playerStandings = []
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT * from Player;")
-    for player in c:
-        playerStandings.append((player[0], player[1], player[2], player[2]+player[3]+player[4]))
-    conn.commit() 
-    conn.close()
+    with cursor() as c:
+        c.execute("SELECT * from Player;")
+        for player in c:
+            playerStandings.append((player[0], player[1], player[2], player[2]+player[3]+player[4]))
     return sorted(playerStandings, key=lambda x: x[2])
 
 
@@ -87,13 +93,10 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT INTO Match (winner, loser) VALUES (%s, %s);", (winner, loser))
-    c.execute("UPDATE Player SET wins = wins+1 WHERE id=%s;", (winner,))
-    c.execute("UPDATE Player SET losses = losses+1 WHERE id=%s;", (loser,))
-    conn.commit() 
-    conn.close()
+    with cursor() as c:
+        c.execute("INSERT INTO Match (winner, loser) VALUES (%s, %s);", (winner, loser))
+        c.execute("UPDATE Player SET wins = wins+1 WHERE id=%s;", (winner,))
+        c.execute("UPDATE Player SET losses = losses+1 WHERE id=%s;", (loser,))
  
  
 def swissPairings():
