@@ -12,22 +12,22 @@ Instructions For Running/Testing
 ```
 * From terminal use **cd** command to go into Vagrant directory.
 	* Assuming the relational-databases directory is in your base directory:
-		**cd /relational-databases/vagrant**
+		__$ cd /relational-databases/vagrant__
 	* Run Vagrant from the directory using the command:
 		**vagrant up**
 	* SSH into vagrant using the command:
-		**vagrant ssh**
+		**$ vagrant ssh**
 	* Enter tournament directory using command:
-		**cd /vagrant/tournament**
+		**$ cd /vagrant/tournament**
 ```
 3. Setup the database
 ```
 * Run command to start Postgres:
-	**psql**
+	**$ psql**
 * Run tournament.sql using command:
-	**\i tournament.sql;**
+	**vagrant=> \i tournament.sql;**
 * Quit psql using command:
-	**\q**
+	**tournament=> \q**
 ```
 * Testing
 ```
