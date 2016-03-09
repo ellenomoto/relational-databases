@@ -3,6 +3,8 @@ rdb-fullstack
 
 Common code for the Relational Databases and Full Stack Fundamentals courses
 
+####This project allows a user to run a swiss tournament.
+
 Instructions For Running/Testing
 ================================
 
